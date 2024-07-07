@@ -15,7 +15,7 @@ secret_key = os.getenv("KEY")
 @app.route('/api/hello', methods=['GET'])
 def hello_name():
     name = request.args.get('visitor_name').strip('"')
-    request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+    client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
     response = requests.get(f"http://ip-api.com/json/{client_ip}")
     location = response.json().get("city")
     base_weather_url = "http://api.weatherapi.com/v1/current.json?key="
@@ -32,4 +32,4 @@ def hello_name():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0")
