@@ -47,6 +47,12 @@ def get_orgs(orgId):
     Returns the details of a specific organisation
     """
     org = Organisation.query.filter(Organisation.orgId == orgId).first()
+    if not org:
+        return jsonify({
+            "status": "Bad Request",
+            "message": "Organisation Not Found",
+            "statusCode": 400
+            }), 400
     response = {
         "status": "success",
         "message": f"{org.name}'s details",
@@ -128,10 +134,22 @@ def add_user(orgId):
             "statusCode": 400
             }), 400
     org = Organisation.query.filter(Organisation.orgId == orgId).first()
+    if not org:
+        return jsonify({
+            "status": "Bad Request",
+            "message": "Organisation Not Found",
+            "statusCode": 400
+            }), 400
     user = User.query.filter(User.userId == userId).first()
+    if not user:
+        return jsonify({
+            "status": "Bad Request",
+            "message": "User Not Found",
+            "statusCode": 400
+            }), 400
     org.users.append(user)
     db.session.commit()
     return jsonify({
         "status": "success",
         "message": "User added to organisation successfully"
-        })
+        }), 200

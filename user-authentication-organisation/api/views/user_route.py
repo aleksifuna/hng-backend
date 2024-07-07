@@ -16,22 +16,38 @@ def user_details(id):
     """
     returns the details of a user
     """
-    if id != get_jwt_identity():
-        return jsonify({
-            "status": "Bad request",
-            "message": "Authentication failed",
-            "statusCode": 401
-        }), 401
-    user = User.query.filter(User.userId == id).first()
-    response = {
-        "status": "success",
-        "message": f"{user.firstName}'s records",
-        "data": {
-            "userId": user.userId,
-            "firstName": user.firstName,
-            "lastName": user.lastName,
-            "email": user.email,
-            "phone": user.phone
+    if id == get_jwt_identity():
+        user = User.query.filter(User.userId == id).first()
+        response = {
+            "status": "success",
+            "message": f"{user.firstName}'s records",
+            "data": {
+                "userId": user.userId,
+                "firstName": user.firstName,
+                "lastName": user.lastName,
+                "email": user.email,
+                "phone": user.phone
+                }
             }
-        }
-    return jsonify(response)
+        return jsonify(response), 200
+    logged_user = User.query.filter(User.userId == get_jwt_identity()).first()
+    user = User.query.filter(User.userId == id).first()
+    for org in logged_user.organisations:
+        if user in org.users:
+            response = {
+                "status": "success",
+                "message": f"{user.firstName}'s records",
+                "data": {
+                    "userId": user.userId,
+                    "firstName": user.firstName,
+                    "lastName": user.lastName,
+                    "email": user.email,
+                    "phone": user.phone
+                    }
+                }
+            return jsonify(response), 200
+    return jsonify({
+        "status": "Not Allowed",
+        "message": "Can only get User info from same organisation",
+        "statusCode": 401
+        }), 401
